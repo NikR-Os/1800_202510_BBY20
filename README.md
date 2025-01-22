@@ -59,8 +59,7 @@ project-name/
 
 ## Contributors
 - **Nikolas Rose** - BCIT CST Student who enjoys programming and has a passion for gaming and hiking.
-- **Teammate Name** - BCIT CST Student, Frontend enthusiast with a knack for creative design. Fun fact: Has a collection of over 50 houseplants.
-
+- **Berenice** - BCIT CST Student, So excited to learn how to write code!
 ---
 
 ## Acknowledgments
