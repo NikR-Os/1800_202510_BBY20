@@ -1,1 +1,13 @@
 
+.nav-link{
+    margin-top:20px;
+    color:green;
+}
+
+.jumbotron {
+    padding-left: 20px;
+}
+
+.jumbotron p {
+    color: darkgreen;
+}
