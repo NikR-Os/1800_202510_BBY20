@@ -24,19 +24,89 @@ function showMap() {
     map.on('load', () => {
 
         //---------------------------------
-        // Add interactive pins for the hikes
+        // Add interactive pins for the sessions
         //---------------------------------
-        //addHikePins(map);
+        //addSessionPins(map);
 
         //--------------------------------------
         // Add interactive pin for the user's location
         //--------------------------------------
-        //addUserPin(map);
+        addUserPin(map);
 
     });
 }
 
 showMap();   // Call it! 
+
+//-----------------------------------------------------
+// Add pin for showing where the user is.
+// This is a separate function so that we can use a different
+// looking pin for the user.  
+// This version uses a pin that is just a circle. 
+//------------------------------------------------------
+function addUserPinCircle(map) {
+
+    // Adds user's current location as a source to the map
+    navigator.geolocation.getCurrentPosition(position => {
+        const userLocation = [position.coords.longitude, position.coords.latitude];
+        console.log(userLocation);
+        if (userLocation) {
+            map.addSource('userLocation', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [{
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': userLocation
+                        },
+                        'properties': {
+                            'description': 'Your location'
+                        }
+                    }]
+                }
+            });
+
+            // Creates a layer above the map displaying the pins
+            // Add a layer showing the places.
+            map.addLayer({
+                'id': 'userLocation',
+                'type': 'circle', // what the pins/markers/points look like
+                'source': 'userLocation',
+                'paint': { // customize colour and size
+                    'circle-color': 'blue',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+
+            // Map On Click function that creates a popup displaying the user's location
+            map.on('click', 'userLocation', (e) => {
+                // Copy coordinates array.
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const description = e.features[0].properties.description;
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // Change the cursor to a pointer when the mouse is over the userLocation layer.
+            map.on('mouseenter', 'userLocation', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Defaults
+            // Defaults cursor when not hovering over the userLocation layer
+            map.on('mouseleave', 'userLocation', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+    });
+}
 
 
 
