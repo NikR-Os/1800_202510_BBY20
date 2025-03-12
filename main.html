@@ -101,7 +101,7 @@
           <form class="d-flex">
             <div class="input-group">
               <input class="form-control form-control-lg" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-primary px-4" type="submit" >
+              <button class="btn btn-primary px-4" type="submit">
                 <i class="fa-solid fa-magnifying-glass" style="color: #ffffff;"></i>
               </button>
             </div>
@@ -114,14 +114,28 @@
     <div id='map' style='width: 98%; height: 800px;'></div>
     <!-- MAPBOX -->
     <div>
-        <div class="card">
-        </div>
-        <div class="card-body">
-            <h5 class="card-title">Need Suggestion?</h5>
-            <p class="card-text">Suggestion Goes Here.</p>
-        </div>
+      <div class="card">
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Need Suggestion?</h5>
+        <p class="card-text">Suggestion Goes Here.</p>
+      </div>
     </div>
-    
+
+    <!-- create a Session form -->
+    <div class="mb-3">
+      <label for="formGroupExampleInput" class="form-label">Session Descripton</label>
+      <input type="text" class="form-control" id="sessionFormInput" placeholder="Describe the purpose of your session">
+      <button class="btn btn-primary" type="submit" onclick="writeSessions()">Submit form</button>
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Length
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#">30 minutes</a></li>
+        <li><a class="dropdown-item" href="#">1 hour</a></li>
+        <li><a class="dropdown-item" href="#">2 hours</a></li>
+      </ul>
+    </div>
 
     <div class="dropdown my-4">
       <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -176,7 +190,7 @@
   <script src="./scripts/firebaseAPI.js"></script>
   <script src="./scripts/main.js"></script>
   <script src="./scripts/script.js"></script>
-  
+
 
 </body>
 
