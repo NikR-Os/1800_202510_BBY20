@@ -108,5 +108,7 @@ function addUserPinCircle(map) {
     });
 }
 
-
-
+// update the Length button's text when a dropdown item is selected.
+function updateLength(selectedLength) {
+    document.getElementById("lengthInput").textContent = selectedLength;
+}

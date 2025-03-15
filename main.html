@@ -127,16 +127,17 @@
       <label for="formGroupExampleInput" class="form-label">Session Descripton</label>
       <input type="text" class="form-control" id="sessionFormInput" placeholder="Describe the purpose of your session">
       <button class="btn btn-primary" type="submit" onclick="writeSessions()">Submit form</button>
-      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="btn btn-secondary dropdown-toggle" id="lengthInput" type="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
         Length
       </button>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">30 minutes</a></li>
-        <li><a class="dropdown-item" href="#">1 hour</a></li>
-        <li><a class="dropdown-item" href="#">2 hours</a></li>
-      </ul>
+        <li><a class="dropdown-item" id="length30" href="#" onclick="updateLength('30 minutes')">30 minutes</a></li>
+        <li><a class="dropdown-item" id="length60" href="#" onclick="updateLength('1 hour')">1 hour</a></li>
+        <li><a class="dropdown-item" id="length120" href="#" onclick="updateLength('2 hours')">2 hours</a></li>
+    </ul>
     </div>
-
+    <!-- select a specific location -->
     <div class="dropdown my-4">
       <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         Select a Building
