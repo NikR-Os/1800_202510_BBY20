@@ -28,56 +28,45 @@
 
     <!-------------------------------------------->
     <!-- Other libraries and styles of your own -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-------------------------------------------->
     <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
     <!-- <link rel="stylesheet" href="./styles/style.css"> -->
-
+    <link rel="stylesheet" href="./styles/style_login.css">
 </head>
-
 <body>
+  <nav id="navbarPlaceholder"></nav>
+  <div class="split-screen">
+      <!-- Left side: Campus Nav heading -->
+      <div class="left-side">
+        <i class="fas fa-map fa-lg mb-4"></i> <!-- Font Awesome map icon -->
+        Campus Nav
+      </div>
 
-    <!------------------------------>
-    <!-- Your HTML Layout go here -->
-    <!------------------------------>
-    <!-- Stuff for body goes here -->
+      <!-- Right side: Forms -->
+      <div class="right-side">
+          <div class="form-container">
+              <div id="login-form" style="display: none;">
+                  <h3>Log in</h3>
+                  <input type="email" id="login-email" placeholder="Email" class="form-control mb-3">
+                  <input type="password" id="login-password" placeholder="Password" class="form-control mb-3">
+                  <button id="login-submit" class="btn btn-success w-100">Log in</button>
+                  <p class="mt-3">Don't have an account? <a href="login.html?action=signup">Create an Account</a></p>
+              </div>
 
-    <nav class="navbar navbar-expand-lg bg-body-tertiary px-5">
-        <div class="container-fluid">
-          <a class="navbar-brand text-success" href="#">
-            <i class="fas fa-map fa-lg mb-4"></i> <!-- Font Awesome Map Icon -->
-            CAMPUS NAV
-            </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav gap-4">
-              <li class="nav-item text-center">
-                <a class="nav-link active text-success" aria-current="page" href="#">
-                    <i class="fas fa-home fa-lg d-block mb-3"></i> <!-- Icon Above -->
-                    HOME
-                </a>
+              <div id="signup-form" style="display: none;">
+                  <h3>Create an Account</h3>
+                  <input type="text" id="signup-name" placeholder="Your Name" class="form-control mb-3">
+                  <input type="email" id="signup-email" placeholder="Email" class="form-control mb-3">
+                  <input type="password" id="signup-password" placeholder="Password" class="form-control mb-3">
+                  <button id="signup-submit" class="btn btn-success w-100">Sign Up</button>
+                  <p class="mt-3">Already have an account? <a href="login.html?action=login">Log in</a></p>
+              </div>
 
-              </li>
-            
-              <li class="nav-item text-center">
-                <a class="nav-link text-succes" href="#">
-                    <i class="fas fa-cog fa-lg d-block mb-3"></i> 
-                    SETTINGS
-                </a>
-
-              </li>
-            </ul>
+              <div id="loader" style="display: none;">Loading...</div>
           </div>
-        </div>
-      </nav>
-
-      <!-- Berenice - Login Button-->
-      <div class="container">
-        <h1>Let's Login!</h1>
-    </div>
-    <div id="firebaseui-auth-container"></div>
-    <div id="loader">Loading...</div>
+      </div>
+  </div>
 
       <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top" style="margin-top: auto;">
         <p class="col-md-4 mb-0 text-muted">&copy; CAMPUSNAV</p>
@@ -100,7 +89,7 @@
     <script src="./scripts/script.js"></script>
     <script src="./scripts/firebaseAPI.js"></script>
     <script src="./scripts/authentification.js"></script>
-
+    <script src="./scripts/skeleton.js"></script>
 </body>
 
 </html>
