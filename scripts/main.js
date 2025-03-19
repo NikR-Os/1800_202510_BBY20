@@ -1,3 +1,32 @@
+const geojson = {
+    type: 'FeatureCollection',
+    features: [
+        {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [-77.032, 38.913]
+            },
+            properties: {
+                title: 'Mapbox',
+                description: 'Washington, D.C.'
+            }
+        },
+        {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [-122.414, 37.776]
+            },
+            properties: {
+                title: 'Mapbox',
+                description: 'San Francisco, California'
+            }
+        }
+    ]
+};
+
+
 
 function showMap() {
     //------------------------------------------
@@ -26,89 +55,110 @@ function showMap() {
         //---------------------------------
         // Add interactive pins for the sessions
         //---------------------------------
-        //addSessionPins(map);
+        addSessionPinsCircle(map);
 
         //--------------------------------------
         // Add interactive pin for the user's location
         //--------------------------------------
-        addUserPin(map);
+        //addUserPin(map);
 
     });
 }
 
 showMap();   // Call it! 
 
-//-----------------------------------------------------
-// Add pin for showing where the user is.
-// This is a separate function so that we can use a different
-// looking pin for the user.  
-// This version uses a pin that is just a circle. 
-//------------------------------------------------------
-function addUserPinCircle(map) {
-
-    // Adds user's current location as a source to the map
-    navigator.geolocation.getCurrentPosition(position => {
-        const userLocation = [position.coords.longitude, position.coords.latitude];
-        console.log(userLocation);
-        if (userLocation) {
-            map.addSource('userLocation', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': [{
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': userLocation
-                        },
-                        'properties': {
-                            'description': 'Your location'
-                        }
-                    }]
-                }
-            });
-
-            // Creates a layer above the map displaying the pins
-            // Add a layer showing the places.
-            map.addLayer({
-                'id': 'userLocation',
-                'type': 'circle', // what the pins/markers/points look like
-                'source': 'userLocation',
-                'paint': { // customize colour and size
-                    'circle-color': 'blue',
-                    'circle-radius': 6,
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#ffffff'
-                }
-            });
-
-            // Map On Click function that creates a popup displaying the user's location
-            map.on('click', 'userLocation', (e) => {
-                // Copy coordinates array.
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const description = e.features[0].properties.description;
-
-                new mapboxgl.Popup()
-                    .setLngLat(coordinates)
-                    .setHTML(description)
-                    .addTo(map);
-            });
-
-            // Change the cursor to a pointer when the mouse is over the userLocation layer.
-            map.on('mouseenter', 'userLocation', () => {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-
-            // Defaults
-            // Defaults cursor when not hovering over the userLocation layer
-            map.on('mouseleave', 'userLocation', () => {
-                map.getCanvas().style.cursor = '';
-            });
-        }
-    });
-}
-
 // update the Length button's text when a dropdown item is selected.
 function updateLength(selectedLength) {
     document.getElementById("lengthInput").textContent = selectedLength;
+}
+
+function addSessionPinsCircle(map) {
+    db.collection('sessions').get().then(allEvents => {
+
+        const features = [];
+
+        allEvents.forEach(doc => {
+            // Extract coordinates of the session
+            console.log(doc.data().geolocation.longitude);
+            var coordinates = [doc.data().geolocation.longitude, doc.data().geolocation.latitude];
+            console.log(coordinates);
+
+            var sessionDesc = doc.data().description;
+            console.log(sessionDesc);
+
+            var sessionLength = doc.data().length;
+            console.log(sessionLength);
+
+            features.push({
+                'type': 'Feature',
+                'properties': {
+                    'description': sessionDesc,
+                    'length': length
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': coordinates
+                }
+            });
+
+            console.log(features);
+
+        })
+
+        // Adds features (in our case, pins) to the map
+        // "places" is the name of this array of features
+        map.addSource('places', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': features
+            }
+        });
+
+        // Creates a layer above the map displaying the pins
+        // Add a layer showing the places.
+        map.addLayer({
+            'id': 'places',
+            'type': 'circle', // what the pins/markers/points look like
+            'source': 'places',
+            'paint': {   // customize colour and size
+                'circle-color': '#4264fb',
+                'circle-radius': 6,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ffffff'
+            }
+        });
+
+        // When one of the "places" markers are clicked,
+        // create a popup that shows information 
+        // Everything related to a marker is save in features[] array
+        map.on('click', 'places', (e) => {
+            // Copy coordinates array.
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const description = e.features[0].properties.description;
+
+            // Ensure that if the map is zoomed out such that multiple 
+            // copies of the feature are visible, the popup appears over 
+            // the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse hovers over the places layer.
+        map.on('mouseenter', 'places', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Defaults cursor when not hovering over the places layer
+        map.on('mouseleave', 'places', () => {
+            map.getCanvas().style.cursor = '';
+        });
+
+    })
 }
