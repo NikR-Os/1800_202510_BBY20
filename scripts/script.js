@@ -5,24 +5,49 @@ function writeSessions() {
     // Get the selected length from the button text
     var selectedLength = document.getElementById("lengthInput").textContent;
 
-    navigator.geolocation.getCurrentPosition(function (position) {
-        var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            // Get user's email
+            var userEmail = user.email;
+            var userName = user.displayName; // Store the authenticated user's name
+
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
 
 
 
-        sessionsRef.add({
-            owner: sessionStorage.getItem("name"),
-            geolocation: geolocation,
-            description: document.querySelector('#sessionFormInput').value,
-            length: selectedLength,// Store selected length
-            created: firebase.firestore.FieldValue.serverTimestamp()  //current system time
+                sessionsRef.add({
+                    owner: userName,  // Store the authenticated user's name instead of UID
+                    ownerEmail: userEmail, // Store the authenticated user's email
+                    geolocation: geolocation,
+                    description: document.querySelector('#sessionFormInput').value,
+                    length: selectedLength,// Store selected length
+                    created: firebase.firestore.FieldValue.serverTimestamp()  //current system time
+                })
 
-        });
-    }, function (error) {
-        console.error("Geolocation error: " + error.message);
-        alert("Could not retrieve geolocation. Please try again.");
+                .then(docRef => {  // Once the session is successfully created...
+                    // Update the logged-in user's document in Firestore to store the session ID
+                    db.collection("users").doc(user.uid).update({
+                        session: docRef.id  // Store the newly created session's unique ID in the user's document
+                    })
+                    .catch(error => { // Handle errors if the user document update fails
+                        console.error("Error updating user document: ", error);
+                    });
+                })
+                .catch(error => { // Handle errors if session creation fails
+                    console.error("Error adding session: ", error);
+                });
+
+            }, function (error) {
+                console.error("Geolocation error: " + error.message);
+                alert("Could not retrieve geolocation. Please try again.");
+            });
+        } else {
+            alert("You must be logged in to create a session.");
+        }
     });
 }
+
 function checkSessionExpiration(sessionId, created, length) {
     // Convert session length to milliseconds
     let lengthInMillis = convertLengthToMillis(length);
@@ -54,14 +79,14 @@ function convertLengthToMillis(length) {
 function deleteSession(sessionId) {
     var sessionRef = db.collection("sessions").doc(sessionId);
 
-    sessionRef.delete().then(function() {
+    sessionRef.delete().then(function () {
         console.log("Session successfully deleted!");
-    }).catch(function(error) {
+    }).catch(function (error) {
         console.error("Error removing session: ", error);
     });
 }
 // Example: Check every minute
-setInterval(function() {
+setInterval(function () {
     db.collection("sessions").get().then(snapshot => {
         snapshot.forEach(doc => {
             const data = doc.data();
