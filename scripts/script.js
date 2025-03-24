@@ -10,16 +10,16 @@ function writeSessions() {
             // Get user's email
             var userEmail = user.email;
 
-            // ✅ Fetch user's name from Firestore before proceeding
+            // Fetch user's name from Firestore before proceeding
             db.collection("users").doc(user.uid).get().then(doc => {
                 if (doc.exists) {
                     var userName = doc.data().name; // Get the stored name
 
-                    // ✅ Start geolocation after retrieving the name
+                    // Start geolocation after retrieving the name
                     navigator.geolocation.getCurrentPosition(function (position) {
                         var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
 
-                        // ✅ Create the session only after userName is available
+                        // Create the session only after userName is available
                         sessionsRef.add({
                             owner: userName,  // Store the authenticated user's name instead of UID
                             ownerEmail: userEmail, // Store the authenticated user's email
@@ -28,18 +28,18 @@ function writeSessions() {
                             length: selectedLength, // Store selected length
                             created: firebase.firestore.FieldValue.serverTimestamp() // Current system time
                         })
-                        .then(docRef => {  // Once the session is successfully created...
-                            // ✅ Update the logged-in user's document in Firestore to store the session ID
-                            db.collection("users").doc(user.uid).update({
-                                session: docRef.id // Store the newly created session's unique ID in the user's document
+                            .then(docRef => {  // Once the session is successfully created...
+                                //  Update the logged-in user's document in Firestore to store the session ID
+                                db.collection("users").doc(user.uid).update({
+                                    session: docRef.id // Store the newly created session's unique ID in the user's document
+                                })
+                                    .catch(error => { // Handle errors if the user document update fails
+                                        console.error("Error updating user document: ", error);
+                                    });
                             })
-                            .catch(error => { // Handle errors if the user document update fails
-                                console.error("Error updating user document: ", error);
+                            .catch(error => { // Handle errors if session creation fails
+                                console.error("Error adding session: ", error);
                             });
-                        })
-                        .catch(error => { // Handle errors if session creation fails
-                            console.error("Error adding session: ", error);
-                        });
 
                     }, function (error) {
                         console.error("Geolocation error: " + error.message);
@@ -72,7 +72,30 @@ function checkSessionExpiration(sessionId, created, length) {
 
     // If the current time has passed the expiration time, delete the session
     if (currentTime >= expirationTime) {
-        deleteSession(sessionId);
+
+        //Find the user that owns this session
+        db.collection("users").where("session", "==", sessionId).get()
+            .then(querySnapshot => {
+                // 🔽 ADDED: Directly access the first (and only) matching user document
+                let userDoc = querySnapshot.docs[0];
+
+                // Clear the session field in that user's Firestore document
+                db.collection("users").doc(userDoc.id).update({ session: null })
+                    .then(() => {
+                        console.log("User session cleared.");
+
+                        // Delete session *after* clearing the user's session field
+                        deleteSession(sessionId);
+                    })
+                    .catch(error => {
+                        console.error("Error clearing user session:", error);
+                    });
+            })
+            .catch(error => {
+                console.error("Error finding user with session:", error);
+            });
+
+
     }
 }
 
@@ -88,15 +111,6 @@ function convertLengthToMillis(length) {
     return 0; // Default to 0 if no length is matched
 }
 
-function deleteSession(sessionId) {
-    var sessionRef = db.collection("sessions").doc(sessionId);
-
-    sessionRef.delete().then(function () {
-        console.log("Session successfully deleted!");
-    }).catch(function (error) {
-        console.error("Error removing session: ", error);
-    });
-}
 // Example: Check every minute
 setInterval(function () {
     db.collection("sessions").get().then(snapshot => {
@@ -110,3 +124,14 @@ setInterval(function () {
         });
     });
 }, 60000); // Check every minute (60000 ms)
+
+
+function deleteSession(sessionId) {
+    var sessionRef = db.collection("sessions").doc(sessionId);
+
+    sessionRef.delete().then(function () {
+        console.log("Session successfully deleted!");
+    }).catch(function (error) {
+        console.error("Error removing session: ", error);
+    });
+}
