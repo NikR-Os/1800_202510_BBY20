@@ -1,5 +1,5 @@
 function writeSessions() {
-    //define a variable for the collection you want to create in Firestore to populate data
+    // Define a variable for the collection you want to create in Firestore
     var sessionsRef = db.collection("sessions");
 
     // Get the selected length from the button text
@@ -9,44 +9,56 @@ function writeSessions() {
         if (user) {
             // Get user's email
             var userEmail = user.email;
-            var userName = user.displayName; // Store the authenticated user's name
 
-            navigator.geolocation.getCurrentPosition(function (position) {
-                var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
+            // ✅ Fetch user's name from Firestore before proceeding
+            db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    var userName = doc.data().name; // Get the stored name
 
+                    // ✅ Start geolocation after retrieving the name
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
 
+                        // ✅ Create the session only after userName is available
+                        sessionsRef.add({
+                            owner: userName,  // Store the authenticated user's name instead of UID
+                            ownerEmail: userEmail, // Store the authenticated user's email
+                            geolocation: geolocation,
+                            description: document.querySelector('#sessionFormInput').value,
+                            length: selectedLength, // Store selected length
+                            created: firebase.firestore.FieldValue.serverTimestamp() // Current system time
+                        })
+                        .then(docRef => {  // Once the session is successfully created...
+                            // ✅ Update the logged-in user's document in Firestore to store the session ID
+                            db.collection("users").doc(user.uid).update({
+                                session: docRef.id // Store the newly created session's unique ID in the user's document
+                            })
+                            .catch(error => { // Handle errors if the user document update fails
+                                console.error("Error updating user document: ", error);
+                            });
+                        })
+                        .catch(error => { // Handle errors if session creation fails
+                            console.error("Error adding session: ", error);
+                        });
 
-                sessionsRef.add({
-                    owner: userName,  // Store the authenticated user's name instead of UID
-                    ownerEmail: userEmail, // Store the authenticated user's email
-                    geolocation: geolocation,
-                    description: document.querySelector('#sessionFormInput').value,
-                    length: selectedLength,// Store selected length
-                    created: firebase.firestore.FieldValue.serverTimestamp()  //current system time
-                })
-
-                .then(docRef => {  // Once the session is successfully created...
-                    // Update the logged-in user's document in Firestore to store the session ID
-                    db.collection("users").doc(user.uid).update({
-                        session: docRef.id  // Store the newly created session's unique ID in the user's document
-                    })
-                    .catch(error => { // Handle errors if the user document update fails
-                        console.error("Error updating user document: ", error);
+                    }, function (error) {
+                        console.error("Geolocation error: " + error.message);
+                        alert("Could not retrieve geolocation. Please try again.");
                     });
-                })
-                .catch(error => { // Handle errors if session creation fails
-                    console.error("Error adding session: ", error);
-                });
 
-            }, function (error) {
-                console.error("Geolocation error: " + error.message);
-                alert("Could not retrieve geolocation. Please try again.");
+                } else {
+                    console.error("User document does not exist in Firestore.");
+                }
+            }).catch(error => {
+                console.error("Error fetching user name from Firestore:", error);
             });
+
         } else {
             alert("You must be logged in to create a session.");
         }
     });
 }
+
 
 function checkSessionExpiration(sessionId, created, length) {
     // Convert session length to milliseconds
