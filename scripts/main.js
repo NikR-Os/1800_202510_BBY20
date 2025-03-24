@@ -162,3 +162,37 @@ function addSessionPinsCircle(map) {
 
     })
 }
+
+// Listen for changes in the authentication state (e.g., user logs in or out)
+firebase.auth().onAuthStateChanged(user => {
+
+    // Only proceed if a user is currently logged in
+    if (user) {
+
+        // Get a reference to the HTML element that will act as the session status indicator (the dot)
+        const indicator = document.getElementById("session-indicator");
+        // Get a reference to the HTML element that will act as the session status text label
+        const label = document.getElementById("session-indicator-label");
+
+
+        // Set up a real-time listener on the current user's document in the "users" Firestore collection
+        db.collection("users").doc(user.uid).onSnapshot(doc => {
+            // Check if the user's document actually exists in Firestore
+            if (doc.exists) {
+                // Get the current value of the "session" field from the user's document
+                const sessionId = doc.data().session;
+
+                // If the session field exists and is not the string "null"
+                if (sessionId && sessionId !== "null") {
+                    //  Green dot for active session
+                    indicator.style.backgroundColor = "green";
+                    label.textContent = "Active Session"; // Set visible text
+                } else {
+                    // Red dot for no session
+                    indicator.style.backgroundColor = "red";
+                    label.textContent = "No Active Session"; //  Set visible text
+                }
+            }
+        });
+    }
+});
