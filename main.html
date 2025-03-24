@@ -56,7 +56,18 @@
   <!-- Nikolas - Welcome Hero Screen-->
   <div class="jumbotron mt-5">
     <h1 class="display-4">Welcome!</h1>
-    <p class="lead">Make navigating around campus simple!</p>
+
+<!-- Session status indicator container -->
+<div id="session-indicator-wrapper">
+  <!-- The colored dot -->
+  <div id="session-indicator"></div>
+
+  <!-- The visible text label -->
+  <span id="session-indicator-label">Checking session...</span>
+
+  <button id="delete-session-btn" type="button" class="btn btn-outline-danger btn-sm" title="Delete Session">×</button>
+
+</div>
 
     <!-- Nikolas - Location Seatch Bar-->
     <div class="container">
@@ -99,6 +110,7 @@
         <li><a class="dropdown-item" id="length30" href="#" onclick="updateLength('30 minutes')">30 minutes</a></li>
         <li><a class="dropdown-item" id="length60" href="#" onclick="updateLength('1 hour')">1 hour</a></li>
         <li><a class="dropdown-item" id="length120" href="#" onclick="updateLength('2 hours')">2 hours</a></li>
+
     </ul>
     </div>
     <!-- select a specific location -->

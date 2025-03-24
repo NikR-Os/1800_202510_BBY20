@@ -18,11 +18,42 @@ document.getElementById("login-submit")?.addEventListener("click", function () {
         firebase.auth().signInWithEmailAndPassword(email, password)
             .then(function (userCredential) {
                 console.log("User logged in:", userCredential.user); // Debugging
-                window.location.assign("main.html"); // Redirect to main.html after login
+                const user = userCredential.user;
+
+
+
+
+
+                // Check if the user exists in the Firestore database under "users" collection
+                db.collection("users").doc(user.uid).get()
+                    .then(function (doc) {
+                        if (doc.exists) {
+                            // User exists in Firestore, proceed to main page
+                            console.log("User exists in Firestore. Redirecting to main page.");
+                            window.location.assign("main.html");
+                        } else {
+                            // User does NOT exist in Firestore, redirect to signup form
+                            console.log("User not found in Firestore. Redirecting to signup...");
+                            window.location.assign("login.html?action=signup");
+                            // This adds '?action=signup' to the URL so the signup form is displayed
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log("Error checking Firestore for user:", error); // Debugging
+                    });
+
             })
+
             .catch(function (error) {
                 console.log("Error logging in:", error); // Debugging
-                alert("Error logging in: " + error.message); // Show error to user
+                
+                 // If Firebase returns "user not found", redirect to signup page
+                 if (error.code === "auth/user-not-found") {
+                    console.log("User not found in Firebase Auth. Redirecting to signup...");
+                    window.location.assign("login.html?action=signup");
+                } else {
+                    alert("Error logging in: " + error.message);
+                }
             });
     } else {
         alert("Please fill out all fields."); // Show error if fields are empty
