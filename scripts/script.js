@@ -135,3 +135,19 @@ function deleteSession(sessionId) {
         console.error("Error removing session: ", error);
     });
 }
+
+// Wait until the entire HTML document is fully loaded before running this code
+document.addEventListener("DOMContentLoaded", () => {
+
+    // Look for the delete session button in the DOM by its unique ID
+    const deleteBtn = document.getElementById("delete-session-btn");
+
+    //  Check that the button actually exists on the page before trying to use it
+    // This prevents errors in case the button isn't rendered yet or is missing from the HTML
+    if (deleteBtn) {
+
+        //  Attach an event listener to the button that listens for a "click" event
+        // When the button is clicked, it will call the deleteCurrentUserSession() function
+        deleteBtn.addEventListener("click", deleteCurrentUserSession);
+    }
+});
