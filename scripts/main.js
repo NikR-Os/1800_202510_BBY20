@@ -1,33 +1,3 @@
-const geojson = {
-    type: 'FeatureCollection',
-    features: [
-        {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-77.032, 38.913]
-            },
-            properties: {
-                title: 'Mapbox',
-                description: 'Washington, D.C.'
-            }
-        },
-        {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-122.414, 37.776]
-            },
-            properties: {
-                title: 'Mapbox',
-                description: 'San Francisco, California'
-            }
-        }
-    ]
-};
-
-
-
 function showMap() {
     //------------------------------------------
     // Defines and initiates basic mapbox data
@@ -39,8 +9,8 @@ function showMap() {
     const map = new mapboxgl.Map({
         container: 'map', // Container ID
         style: 'mapbox://styles/mapbox/streets-v11', // Styling URL
-        center: [-122.964274, 49.236082], // Starting position
-        zoom: 8 // Starting zoom
+        center: [-123.0019, 49.2490], // Starting position
+        zoom: 16 // Starting zoom
     });
 
     // Add user controls to map, zoom bar
@@ -162,3 +132,4 @@ function addSessionPinsCircle(map) {
 
     })
 }
+
