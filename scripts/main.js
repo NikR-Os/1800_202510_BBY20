@@ -1,33 +1,3 @@
-const geojson = {
-    type: 'FeatureCollection',
-    features: [
-        {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-77.032, 38.913]
-            },
-            properties: {
-                title: 'Mapbox',
-                description: 'Washington, D.C.'
-            }
-        },
-        {
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [-122.414, 37.776]
-            },
-            properties: {
-                title: 'Mapbox',
-                description: 'San Francisco, California'
-            }
-        }
-    ]
-};
-
-
-
 function showMap() {
     //------------------------------------------
     // Defines and initiates basic mapbox data
@@ -39,8 +9,8 @@ function showMap() {
     const map = new mapboxgl.Map({
         container: 'map', // Container ID
         style: 'mapbox://styles/mapbox/streets-v11', // Styling URL
-        center: [-122.964274, 49.236082], // Starting position
-        zoom: 8 // Starting zoom
+        center: [-123.0019, 49.2490], // Starting position
+        zoom: 16 // Starting zoom
     });
 
     // Add user controls to map, zoom bar
@@ -60,7 +30,7 @@ function showMap() {
         //--------------------------------------
         // Add interactive pin for the user's location
         //--------------------------------------
-        //addUserPin(map);
+        addUserPinCircle(map);
 
     });
 }
@@ -122,7 +92,7 @@ function addSessionPinsCircle(map) {
             'type': 'circle', // what the pins/markers/points look like
             'source': 'places',
             'paint': {   // customize colour and size
-                'circle-color': '#4264fb',
+                'circle-color': '#008000',
                 'circle-radius': 6,
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
@@ -161,4 +131,148 @@ function addSessionPinsCircle(map) {
         });
 
     })
+}
+
+//-----------------------------------------------------
+// Add pin for showing where the user is.
+// This is a separate function so that we can use a different
+// looking pin for the user.  
+// This version uses a pin that is just a circle. 
+//------------------------------------------------------
+function addUserPinCircle(map) {
+
+    // Adds user's current location as a source to the map
+    navigator.geolocation.getCurrentPosition(position => {
+        const userLocation = [position.coords.longitude, position.coords.latitude];
+        console.log(userLocation);
+        if (userLocation) {
+            map.addSource('userLocation', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [{
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': userLocation
+                        },
+                        'properties': {
+                            'description': 'Your location'
+                        }
+                    }]
+                }
+            });
+
+            // Creates a layer above the map displaying the pins
+            // Add a layer showing the places.
+            map.addLayer({
+                'id': 'userLocation',
+                'type': 'circle', // what the pins/markers/points look like
+                'source': 'userLocation',
+                'paint': { // customize colour and size
+                    'circle-color': 'blue',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+
+            // Map On Click function that creates a popup displaying the user's location
+            map.on('click', 'userLocation', (e) => {
+                // Copy coordinates array.
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const description = e.features[0].properties.description;
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // Change the cursor to a pointer when the mouse is over the userLocation layer.
+            map.on('mouseenter', 'userLocation', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Defaults
+            // Defaults cursor when not hovering over the userLocation layer
+            map.on('mouseleave', 'userLocation', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+    });
+}
+
+
+// Listen for changes in the authentication state (e.g., user logs in or out)
+firebase.auth().onAuthStateChanged(user => {
+
+    // Only proceed if a user is currently logged in
+    if (user) {
+
+        // Get a reference to the HTML element that will act as the session status indicator (the dot)
+        const indicator = document.getElementById("session-indicator");
+        // Get a reference to the HTML element that will act as the session status text label
+        const label = document.getElementById("session-indicator-label");
+
+        // Get a reference to the delete button
+        const deleteBtn = document.getElementById("delete-session-btn");
+
+
+        // Set up a real-time listener on the current user's document in the "users" Firestore collection
+        db.collection("users").doc(user.uid).onSnapshot(doc => {
+            // Check if the user's document actually exists in Firestore
+            if (doc.exists) {
+                // Get the current value of the "session" field from the user's document
+                const sessionId = doc.data().session;
+
+                // If the session field exists and is not the string "null"
+                if (sessionId && sessionId !== "null") {
+                    //  Green dot for active session
+                    indicator.style.backgroundColor = "green";
+                    label.textContent = "Active Session"; // Set visible text
+                    //Show the delete button
+                    deleteBtn.style.display = "inline-block";
+                } else {
+                    // Red dot for no session
+                    indicator.style.backgroundColor = "red";
+                    label.textContent = "No Active Session"; //  Set visible text
+                    // Hide the delete button
+                    deleteBtn.style.display = "none";
+                }
+            }
+        });
+    }
+});
+
+function deleteCurrentUserSession() {
+    // Get the currently authenticated user from Firebase Auth
+    const user = firebase.auth().currentUser;
+
+    // Access the user's document in Firestore and retrieve the session ID
+    db.collection("users").doc(user.uid).get().then(doc => {
+        // Extract the session ID from the user's Firestore document
+        const sessionId = doc.data().session;
+
+        // Since the delete button is only shown when a session is active,
+        // we can safely proceed to delete the session document
+
+        // Step 1: Delete the session document from the "sessions" collection
+        db.collection("sessions").doc(sessionId).delete()
+            .then(() => {
+                // Step 2: After successfully deleting the session,
+                // update the user's document to set the "session" field to null
+                return db.collection("users").doc(user.uid).update({
+                    session: null
+                });
+            })
+            .then(() => {
+                // Step 3: Log success message to the console
+                console.log("Session deleted and user session field cleared.");
+            })
+            .catch(error => {
+                // Handle any errors that occur during deletion or update
+                console.error("Error deleting session:", error);
+            });
+    });
 }
