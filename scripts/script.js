@@ -18,7 +18,7 @@ function writeSessions() {
                     // Start geolocation after retrieving the name
                     navigator.geolocation.getCurrentPosition(function (position) {
                         var geolocation = new firebase.firestore.GeoPoint(position.coords.latitude, position.coords.longitude);
-
+                        
                         // Create the session only after userName is available
                         sessionsRef.add({
                             owner: userName,  // Store the authenticated user's name instead of UID
@@ -40,7 +40,7 @@ function writeSessions() {
                             .catch(error => { // Handle errors if session creation fails
                                 console.error("Error adding session: ", error);
                             });
-
+                            
                     }, function (error) {
                         console.error("Geolocation error: " + error.message);
                         alert("Could not retrieve geolocation. Please try again.");
