@@ -95,8 +95,8 @@ function addSessionPinsCircle(map) {
             'type': 'circle', // what the pins/markers/points look like
             'source': 'places',
             'paint': {   // customize colour and size
-                'circle-color': '#008000',
-                'circle-radius': 6,
+                'circle-color': 'orange',
+                'circle-radius': 20,
                 'circle-stroke-width': 2,
                 'circle-stroke-color': '#ffffff'
             }
