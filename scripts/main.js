@@ -66,7 +66,7 @@ function addSessionPinsCircle(map) {
                 'properties': {
                     'description': sessionDesc,
                     'length': sessionLength,
-                    "owner" : sessionOwner
+                    "owner": sessionOwner
                 },
                 'geometry': {
                     'type': 'Point',
