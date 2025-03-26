@@ -71,3 +71,44 @@
         .left-side i {
             margin-right: 15px; /* Space between icon and text */
         }
+        @media (max-width: 768px) {
+            .split-screen {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .left-side {
+                font-size: 2rem;
+                padding: 15px;
+                min-height: 150px;
+            }
+            
+            .right-side {
+                padding: 30px 15px;
+                align-items: flex-start;
+            }
+            
+            .form-container {
+                width: 90%;
+                margin-top: -50px; /* Overlap slightly with the green section */
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                background: white;
+                border-radius: 8px;
+            }
+            
+            .form-control {
+                padding: 12px;
+                font-size: 16px; /* Prevent iOS zoom */
+            }
+            
+            .btn-success {
+                padding: 12px;
+            }
+            
+            /* Make icons smaller on mobile */
+            .left-side i {
+                font-size: 1.5rem;
+                margin-right: 10px;
+            }
+        }
