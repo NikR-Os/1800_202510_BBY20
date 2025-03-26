@@ -59,11 +59,14 @@ function addSessionPinsCircle(map) {
             var sessionLength = doc.data().length;
             console.log(sessionLength);
 
+            var sessionOwner = doc.data().owner;
+
             features.push({
                 'type': 'Feature',
                 'properties': {
                     'description': sessionDesc,
-                    'length': length
+                    'length': sessionLength,
+                    "owner" : sessionOwner
                 },
                 'geometry': {
                     'type': 'Point',
@@ -106,6 +109,8 @@ function addSessionPinsCircle(map) {
             // Copy coordinates array.
             const coordinates = e.features[0].geometry.coordinates.slice();
             const description = e.features[0].properties.description;
+            const length = e.features[0].properties.length;
+            const owner = e.features[0].properties.owner;
 
             // Ensure that if the map is zoomed out such that multiple 
             // copies of the feature are visible, the popup appears over 
@@ -116,7 +121,7 @@ function addSessionPinsCircle(map) {
 
             new mapboxgl.Popup()
                 .setLngLat(coordinates)
-                .setHTML(description)
+                .setHTML(description + " " + length + " created by " + owner)
                 .addTo(map);
         });
 
