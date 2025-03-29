@@ -38,8 +38,10 @@ function showMap() {
 showMap();   // Call it! 
 
 // update the Length button's text when a dropdown item is selected.
-function updateLength(selectedLength) {
-    document.getElementById("lengthInput").textContent = selectedLength;
+function updateLength(length) {
+    document.getElementById("lengthInput").textContent = length;
+    document.getElementById("sessionLengthValue").value = length;
+    checkFormReady(); // call validation check
 }
 
 function addSessionPinsCircle(map) {
@@ -237,13 +239,70 @@ firebase.auth().onAuthStateChanged(user => {
                     indicator.style.backgroundColor = "green";
                     label.textContent = "Active Session"; // Set visible text
                     //Show the delete button
+                    deleteBtn.style.display = "inline-block";// Green dot for active session
+                    indicator.style.backgroundColor = "green";
+                    label.textContent = "Active Session";
                     deleteBtn.style.display = "inline-block";
+
+        
+                    // Get user name from Firestore instead of displayName
+                    db.collection("users").doc(user.uid).get()
+                        .then(userDoc => {
+                            if (userDoc.exists) {
+                                const userName = userDoc.data().name;
+                                document.getElementById("session-user-name").textContent = `User: ${userName || "Unknown"}`;
+                            } else {
+                                document.getElementById("session-user-name").textContent = "User: Unknown";
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error fetching user name:", error);
+                            document.getElementById("session-user-name").textContent = "User: Unknown";
+                        });
+
+                    // Fetch and show session length and end time
+                    db.collection("sessions").doc(sessionId).get().then(sessionDoc => {
+                        if (sessionDoc.exists) {
+                            const sessionData = sessionDoc.data();
+                            const startTime = sessionData.timestamp?.toDate?.(); // assumes Firestore Timestamp
+                            const length = sessionData.length;
+
+                            let endTimeString = "";
+                            if (startTime && length) {
+                                const endTime = new Date(startTime);
+                                if (length === "30 minutes") endTime.setMinutes(endTime.getMinutes() + 30);
+                                if (length === "1 hour") endTime.setHours(endTime.getHours() + 1);
+                                if (length === "2 hours") endTime.setHours(endTime.getHours() + 2);
+
+                                endTimeString = `Ends at ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                            }
+
+                            document.getElementById("session-duration").textContent =
+                                `Length: ${length || "unknown"}${endTimeString ? " | " + endTimeString : ""}`;
+                        }
+                    });
+
                 } else {
+
                     // Red dot for no session
                     indicator.style.backgroundColor = "red";
                     label.textContent = "No Active Session"; //  Set visible text
                     // Hide the delete button
                     deleteBtn.style.display = "none";
+                    db.collection("users").doc(user.uid).get()
+                        .then(doc => {
+                            if (doc.exists) {
+                                const userName = doc.data().name;
+                                document.getElementById("session-user-name").textContent = `User: ${userName || "Unknown"}`;
+                            } else {
+                                console.warn("User document does not exist!");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error fetching user doc:", error);
+                        });
+
+                    document.getElementById("session-duration").textContent = "No active sessions";
                 }
             }
         });
@@ -281,3 +340,25 @@ function deleteCurrentUserSession() {
             });
     });
 }
+
+/**
+ * Toggles the visibility of the session creation form.
+ */
+function toggleForm() {
+    const form = document.getElementById("sessionFormPopup");
+    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+}
+
+// Enable the submit button only if both fields are filled
+function checkFormReady() {
+    const desc = document.getElementById("sessionFormInput").value.trim();
+    const length = document.getElementById("sessionLengthValue").value.trim();
+    const submitBtn = document.getElementById("submitSessionBtn");
+    submitBtn.disabled = !(desc && length);
+}
+//  Add listener to check description input on every keystroke
+document.addEventListener("DOMContentLoaded", () => {
+    const descInput = document.getElementById("sessionFormInput");
+    descInput.addEventListener("input", checkFormReady);
+});
+
