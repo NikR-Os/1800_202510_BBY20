@@ -346,8 +346,15 @@ function deleteCurrentUserSession() {
  */
 function toggleForm() {
     const form = document.getElementById("sessionFormPopup");
-    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-}
+    const button = document.querySelector(".btn-sage"); // Create Session button
+  
+    const isFormVisible = form.style.display === "block";
+  
+    // Toggle visibility
+    form.style.display = isFormVisible ? "none" : "block";
+    button.style.display = isFormVisible ? "inline-block" : "none"; // Hide or show button
+  }
+  
 
 // Enable the submit button only if both fields are filled
 function checkFormReady() {
