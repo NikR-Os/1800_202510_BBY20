@@ -213,58 +213,38 @@ function addUserPinCircle(map) {
 
 // Listen for changes in the authentication state (e.g., user logs in or out)
 firebase.auth().onAuthStateChanged(user => {
-
     // Only proceed if a user is currently logged in
     if (user) {
-
-        // Get a reference to the HTML element that will act as the session status indicator (the dot)
+        // Get references to HTML elements used in the session status indicator
         const indicator = document.getElementById("session-indicator");
-        // Get a reference to the HTML element that will act as the session status text label
         const label = document.getElementById("session-indicator-label");
-
-        // Get a reference to the delete button
         const deleteBtn = document.getElementById("delete-session-btn");
+        const userNameElem = document.getElementById("session-user-name");
+        const durationElem = document.getElementById("session-duration");
+        const statusMessageElem = document.getElementById("session-status-message");
 
+        // Set up a real-time listener on the current user's document in Firestore
+        db.collection("users").doc(user.uid).onSnapshot(userDoc => {
+            // Ensure the user's document exists
+            if (userDoc.exists) {
+                const userName = userDoc.data().name || "Unknown";
+                userNameElem.textContent = `User: ${userName}`;
 
-        // Set up a real-time listener on the current user's document in the "users" Firestore collection
-        db.collection("users").doc(user.uid).onSnapshot(doc => {
-            // Check if the user's document actually exists in Firestore
-            if (doc.exists) {
-                // Get the current value of the "session" field from the user's document
-                const sessionId = doc.data().session;
+                // Get the current session ID for this user
+                const sessionId = userDoc.data().session;
 
-                // If the session field exists and is not the string "null"
+                // Check if the user currently has an active session
                 if (sessionId && sessionId !== "null") {
-                    //  Green dot for active session
-                    indicator.style.backgroundColor = "green";
-                    label.textContent = "Active Session"; // Set visible text
-                    //Show the delete button
-                    deleteBtn.style.display = "inline-block";// Green dot for active session
+                    // Green dot for active session
                     indicator.style.backgroundColor = "green";
                     label.textContent = "Active Session";
                     deleteBtn.style.display = "inline-block";
 
-        
-                    // Get user name from Firestore instead of displayName
-                    db.collection("users").doc(user.uid).get()
-                        .then(userDoc => {
-                            if (userDoc.exists) {
-                                const userName = userDoc.data().name;
-                                document.getElementById("session-user-name").textContent = `User: ${userName || "Unknown"}`;
-                            } else {
-                                document.getElementById("session-user-name").textContent = "User: Unknown";
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error fetching user name:", error);
-                            document.getElementById("session-user-name").textContent = "User: Unknown";
-                        });
-
-                    // Fetch and show session length and end time
+                    // Fetch session details from Firestore
                     db.collection("sessions").doc(sessionId).get().then(sessionDoc => {
                         if (sessionDoc.exists) {
                             const sessionData = sessionDoc.data();
-                            const startTime = sessionData.timestamp?.toDate?.(); // assumes Firestore Timestamp
+                            const startTime = sessionData.timestamp?.toDate?.(); // Firestore Timestamp
                             const length = sessionData.length;
 
                             let endTimeString = "";
@@ -274,35 +254,24 @@ firebase.auth().onAuthStateChanged(user => {
                                 if (length === "1 hour") endTime.setHours(endTime.getHours() + 1);
                                 if (length === "2 hours") endTime.setHours(endTime.getHours() + 2);
 
-                                endTimeString = `Ends at ${endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                                endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
 
-                            document.getElementById("session-duration").textContent =
-                                `Length: ${length || "unknown"}${endTimeString ? " | " + endTimeString : ""}`;
+                            // Update UI with session details
+                            durationElem.textContent = `Length: ${length || "unknown"}${endTimeString ? " | Ends at " + endTimeString : ""}`;
+                            statusMessageElem.textContent = `Hey ${userName}, your ${length} session ends at ${endTimeString}.`;
                         }
                     });
 
                 } else {
-
-                    // Red dot for no session
+                    // Red dot for no active session
                     indicator.style.backgroundColor = "red";
-                    label.textContent = "No Active Session"; //  Set visible text
-                    // Hide the delete button
+                    label.textContent = "No Active Session";
                     deleteBtn.style.display = "none";
-                    db.collection("users").doc(user.uid).get()
-                        .then(doc => {
-                            if (doc.exists) {
-                                const userName = doc.data().name;
-                                document.getElementById("session-user-name").textContent = `User: ${userName || "Unknown"}`;
-                            } else {
-                                console.warn("User document does not exist!");
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error fetching user doc:", error);
-                        });
 
-                    document.getElementById("session-duration").textContent = "No active sessions";
+                    // Display no session message clearly
+                    durationElem.textContent = "No active sessions";
+                    statusMessageElem.textContent = `Hey ${userName}, you have no active sessions.`;
                 }
             }
         });
