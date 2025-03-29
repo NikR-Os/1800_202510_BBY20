@@ -234,44 +234,64 @@ firebase.auth().onAuthStateChanged(user => {
                 if (sessionId && sessionId !== "null") {
                     // Green dot for active session
                     indicator.style.backgroundColor = "green";
-                    label.textContent = "Active";
+                    label.textContent = "Active Session";
                     deleteBtn.style.display = "inline-block";
 
-                    // Fetch session details from Firestore
+                    // Fetch session details from Firestore using the active session ID
                     db.collection("sessions").doc(sessionId).get().then(sessionDoc => {
+                        // Ensure the session document exists in Firestore
                         if (sessionDoc.exists) {
                             const sessionData = sessionDoc.data();
-                            const startTime = sessionData.timestamp?.toDate?.(); // Firestore Timestamp
+
+                            // Retrieve the session's start time and length from the session document
+                            const startTime = sessionData.timestamp?.toDate?.(); // Firestore Timestamp to JS Date
                             const length = sessionData.length;
 
-                            let endTimeString = "";
+
+                            console.log("Session Data:", sessionData);
+                            console.log("Start Time:", sessionData.timestamp);
+                            console.log("Length:", sessionData.length);
+
+                            // Check that both start time and session length are available
                             if (startTime && length) {
-                                const endTime = new Date(startTime);
-                                if (length === "30 minutes") endTime.setMinutes(endTime.getMinutes() + 30);
-                                if (length === "1 hour") endTime.setHours(endTime.getHours() + 1);
-                                if (length === "2 hours") endTime.setHours(endTime.getHours() + 2);
+                                // Calculate the exact session end time based on its length
+                                let endTime = new Date(startTime);
+                                if (length === "30 minutes") {
+                                    endTime.setMinutes(endTime.getMinutes() + 30);
+                                } else if (length === "1 hour") {
+                                    endTime.setHours(endTime.getHours() + 1);
+                                } else if (length === "2 hours") {
+                                    endTime.setHours(endTime.getHours() + 2);
+                                }
 
-                                endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                // Format the calculated end time as a readable string (e.g., "02:30 PM")
+                                const endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                                // Update the UI with a friendly status message including user's name, session length, and exact end time
+                                statusMessageElem.textContent = `Hey ${userName}, your ${length} session ends at ${endTimeString}.`;
+
+                            } else {
+                                // Graceful fallback message in case session data is incomplete or missing
+                                statusMessageElem.textContent = `Hey ${userName}, session details aren't available.`;
                             }
-
-                            // Update UI with friendly status message only
-                            statusMessageElem.textContent = `Hey ${userName}, your ${length} session ends at ${endTimeString}.`;
                         }
                     });
 
                 } else {
                     // Red dot for no active session
                     indicator.style.backgroundColor = "red";
-                    label.textContent = "Inactive";
+                    label.textContent = "No Active Session";
                     deleteBtn.style.display = "none";
 
                     // Friendly message for no active sessions
                     statusMessageElem.textContent = `Hey ${userName}, you have no active sessions.`;
                 }
             }
-        });
-    }
-});
+        });  // <-- Closes onSnapshot listener
+    } // <-- Closes if(user)
+}); // <-- Closes firebase.auth listener
+
+                
 
 
 function deleteCurrentUserSession() {

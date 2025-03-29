@@ -26,7 +26,7 @@ function writeSessions() {
                             geolocation: geolocation,
                             description: document.querySelector('#sessionFormInput').value,
                             length: selectedLength, // Store selected length
-                            created: firebase.firestore.FieldValue.serverTimestamp() // Current system time
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp() // Current system time
                         })
                             .then(docRef => {  // Once the session is successfully created...
                                 //  Update the logged-in user's document in Firestore to store the session ID
