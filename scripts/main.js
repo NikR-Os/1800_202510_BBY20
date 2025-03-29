@@ -219,16 +219,13 @@ firebase.auth().onAuthStateChanged(user => {
         const indicator = document.getElementById("session-indicator");
         const label = document.getElementById("session-indicator-label");
         const deleteBtn = document.getElementById("delete-session-btn");
-        const userNameElem = document.getElementById("session-user-name");
-        const durationElem = document.getElementById("session-duration");
         const statusMessageElem = document.getElementById("session-status-message");
 
         // Set up a real-time listener on the current user's document in Firestore
         db.collection("users").doc(user.uid).onSnapshot(userDoc => {
             // Ensure the user's document exists
             if (userDoc.exists) {
-                const userName = userDoc.data().name || "Unknown";
-                userNameElem.textContent = `User: ${userName}`;
+                const userName = userDoc.data().name || "there";
 
                 // Get the current session ID for this user
                 const sessionId = userDoc.data().session;
@@ -237,7 +234,7 @@ firebase.auth().onAuthStateChanged(user => {
                 if (sessionId && sessionId !== "null") {
                     // Green dot for active session
                     indicator.style.backgroundColor = "green";
-                    label.textContent = "Active Session";
+                    label.textContent = "Active";
                     deleteBtn.style.display = "inline-block";
 
                     // Fetch session details from Firestore
@@ -257,8 +254,7 @@ firebase.auth().onAuthStateChanged(user => {
                                 endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             }
 
-                            // Update UI with session details
-                            durationElem.textContent = `Length: ${length || "unknown"}${endTimeString ? " | Ends at " + endTimeString : ""}`;
+                            // Update UI with friendly status message only
                             statusMessageElem.textContent = `Hey ${userName}, your ${length} session ends at ${endTimeString}.`;
                         }
                     });
@@ -266,17 +262,17 @@ firebase.auth().onAuthStateChanged(user => {
                 } else {
                     // Red dot for no active session
                     indicator.style.backgroundColor = "red";
-                    label.textContent = "No Active Session";
+                    label.textContent = "Inactive";
                     deleteBtn.style.display = "none";
 
-                    // Display no session message clearly
-                    durationElem.textContent = "No active sessions";
+                    // Friendly message for no active sessions
                     statusMessageElem.textContent = `Hey ${userName}, you have no active sessions.`;
                 }
             }
         });
     }
 });
+
 
 function deleteCurrentUserSession() {
     // Get the currently authenticated user from Firebase Auth
