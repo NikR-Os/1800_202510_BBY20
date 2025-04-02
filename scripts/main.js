@@ -61,12 +61,15 @@ function addSessionPinsCircle(map) {
 
             var sessionOwner = doc.data().owner;
 
+            var sessionEmail = doc.data().email;
+
             features.push({
                 'type': 'Feature',
                 'properties': {
                     'description': sessionDesc,
                     'length': sessionLength,
-                    "owner": sessionOwner
+                    "owner": sessionOwner,
+                    "email" : sessionEmail
                 },
                 'geometry': {
                     'type': 'Point',
@@ -96,8 +99,8 @@ function addSessionPinsCircle(map) {
             'source': 'places',
             'paint': {   // customize colour and size
                 'circle-color': 'orange',
-                'circle-radius': 20,
-                'circle-stroke-width': 2,
+                'circle-radius': 10,
+                'circle-stroke-width': 4,
                 'circle-stroke-color': '#ffffff'
             }
         });
@@ -111,6 +114,7 @@ function addSessionPinsCircle(map) {
             const description = e.features[0].properties.description;
             const length = e.features[0].properties.length;
             const owner = e.features[0].properties.owner;
+            const email = e.features[0].properties.userEmail;
 
             // Ensure that if the map is zoomed out such that multiple 
             // copies of the feature are visible, the popup appears over 
@@ -121,7 +125,7 @@ function addSessionPinsCircle(map) {
 
             new mapboxgl.Popup()
                 .setLngLat(coordinates)
-                .setHTML(description + " " + length + " created by " + owner)
+                .setHTML(description + " " + length + " created by " + owner + " (" + email + ")")
                 .addTo(map);
         });
 
@@ -149,6 +153,7 @@ function addUserPinCircle(map) {
     // Adds user's current location as a source to the map
     navigator.geolocation.getCurrentPosition(position => {
         const userLocation = [position.coords.longitude, position.coords.latitude];
+
         console.log(userLocation);
         if (userLocation) {
             map.addSource('userLocation', {
@@ -176,7 +181,7 @@ function addUserPinCircle(map) {
                 'source': 'userLocation',
                 'paint': { // customize colour and size
                     'circle-color': 'blue',
-                    'circle-radius': 6,
+                    'circle-radius': 8,
                     'circle-stroke-width': 2,
                     'circle-stroke-color': '#ffffff'
                 }
