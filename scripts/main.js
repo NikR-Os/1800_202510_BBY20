@@ -63,7 +63,7 @@ function addSessionPinsCircle(map) {
 
             var sessionOwner = doc.data().owner;
 
-            var sessionEmail = doc.data().email;
+            var sessionEmail = doc.data().ownerEmail;
 
             features.push({
                 'type': 'Feature',
@@ -97,7 +97,7 @@ function addSessionPinsCircle(map) {
         // Add a layer showing the places.
         map.addLayer({
             'id': 'places',
-            'type': 'circle', // what the pins/markers/points look like
+            'type': 'circle',
             'source': 'places',
             'paint': {   // customize colour and size
                 'circle-color': 'orange',
@@ -116,7 +116,9 @@ function addSessionPinsCircle(map) {
             const description = e.features[0].properties.description;
             const length = e.features[0].properties.length;
             const owner = e.features[0].properties.owner;
-            const email = e.features[0].properties.userEmail;
+            const email = e.features[0].properties.email;
+
+            console.log("Email!" + email);
 
             // Ensure that if the map is zoomed out such that multiple 
             // copies of the feature are visible, the popup appears over 
