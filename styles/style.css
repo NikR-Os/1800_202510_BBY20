@@ -118,3 +118,13 @@
     margin-bottom: 4px;
   }
 }
+
+.btn-sage {
+  background-color: #738A6E; /* deeper sage/olive green */
+  color: white;
+  border: none;
+}
+
+.btn-sage:hover {
+  background-color: #738A6E; /* darker on hover */
+}

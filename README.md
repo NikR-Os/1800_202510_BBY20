@@ -18,6 +18,11 @@ Example:
 - Real-time weather updates for any city.
 - Responsive design for desktop and mobile.
 - Displays temperature, humidity, and weather conditions.
+- Color palelte:  Monochromatic Sage Green Color Palette: 
+Sage Hint (#BFCFBB)
+Mint (#BFCFBB)
+Sage (#8EA58C)
+Moss (#738A6E)
 
 ---
 
