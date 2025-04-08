@@ -60,7 +60,7 @@
 
 
 <!-- Flex row to hold session indicator and form side-by-side -->
-<div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-5">
+<div class="d-flex flex-wrap justify-content-center align-items-center gap-1 mb-5">
 
   <!-- Enhanced session status display -->
   <div id="session-indicator-wrapper" class="d-flex flex-column align-items-start gap-2 bg-light p-3 border rounded" style="min-width: 300px;">
@@ -71,10 +71,6 @@
       <span id="session-indicator-label">Checking session...</span>
       <button id="delete-session-btn" type="button" class="btn btn-outline-danger btn-sm ms-auto" title="Delete Session">×</button>
     </div>
-    
-   
-
-    <!-- ✅ New addition: Friendly session status message -->
 
   </div>
 
@@ -116,7 +112,7 @@
 
 
     <!-- MAPBOX -->
-    <div id='map' style='width: 90%; height: 800px;'></div>
+    <div id='map' style='width: 90%; height: 600px;'></div>
     <!-- MAPBOX -->
     <div>
       <div class="card">
@@ -125,8 +121,7 @@
 
    
     
-  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top"
-    style="margin-top: auto;">
+  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
     <p class="col-md-4 mb-0 text-muted">&copy; CAMPUSNAV</p>
 
     <a href="/"

@@ -35,15 +35,17 @@
   }
 
   #map {
-    padding: 4px;
+    padding: 1px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 24px;
     border: white solid 12px;
     outline: #4CAF50 solid 8px; 
     border-radius: 35px; 
   }
 
   footer {
+    padding-top: auto;
     background: 'white';
     color: white;
     padding: 1.5rem;

@@ -1,41 +1,83 @@
 function showMap() {
-    //------------------------------------------
-    // Defines and initiates basic mapbox data
-    //------------------------------------------
-    // TO MAKE THE MAP APPEAR YOU MUST
-    // ADD YOUR ACCESS TOKEN FROM
-    // https://account.mapbox.com
-    mapboxgl.accessToken = 'pk.eyJ1IjoiLWNsYW5rYXBsdW0tIiwiYSI6ImNtODR0Zm54YzJhenAyanEza2Z3eG50MmwifQ.Kx9Kioj3BBgqC5-pSkZkNg';
-    const map = new mapboxgl.Map({
-        container: 'map', // Container ID
-        style: 'mapbox://styles/mapbox/streets-v11', // Styling URL
-        center: [-123.0019, 49.2490], // Starting position
-        zoom: 16 // Starting zoom
-    });
 
-    // Add user controls to map, zoom bar
-    map.addControl(new mapboxgl.NavigationControl());
+    //---------------------------------------------------------------------------------
+    // STEP ONE:  Find out where the user is first
+    // If the user allows location access, use their location to initialize the map;
+    // Otherwise, use the default location.
+    //---------------------------------------------------------------------------------
+    //Default location (YVR city hall) 49.26504440741209, -123.11540318587558
+    let defaultCoords = { lat: 49.2490, lng: -123.0019 };
 
-    //------------------------------------------------
-    // Add listener for when the map finishes loading.
-    // After loading, we can add map features
-    //------------------------------------------------
-    map.on('load', () => {
+    
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Locaion object as a key-value pair
+                let userCoords = {
+                    lng: position.coords.longitude,
+                    lat: position.coords.latitude
+                };
+                console.log(userCoords);
+                initializeMap(userCoords);
+            }, (error) => {
+                console.warn("Geolocation error:", error);
+                initializeMap(defaultCoords); // Load with default location
+            }
+        )
+    } else {
+        console.error("Geolocation is not supported.");
+        initializeMap(defaultCoords); // Load with default location
+    }
+
+
+    //---------------------------------------------------------------------------------
+    // STEP TWO:  Initialize the map
+    // This function will create the map object and add the user's location to the map
+    // as a pin. It will also add an event listener for when the user clicks on the map
+    // to get the route from the user's location to the clicked location.
+    //
+    // @params   coords:  an object with the user's location as a key-value pair
+    //---------------------------------------------------------------------------------
+    function initializeMap(coords) {
+
+        //---------------------------------------------------------------
+        // Convert the key value pair structure to an array of coordinates
+        //---------------------------------------------------------------
+        var userLocation = [coords.lng, coords.lat];   //user's location 
+        console.log(userLocation);
+        //----------------------
+        // Create the map "map"
+        //----------------------
+        mapboxgl.accessToken = 'pk.eyJ1IjoiLWNsYW5rYXBsdW0tIiwiYSI6ImNtODR0Zm54YzJhenAyanEza2Z3eG50MmwifQ.Kx9Kioj3BBgqC5-pSkZkNg';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11', // Styling URL,
+            center: userLocation, // center the map at the user's location
+            //center: [-123.0019, 49.2490], // Starting position
+            zoom: 16
+        });
+
+        //---------------------------------------------------------------------------------
+        // Add the user's location to the map
+        //---------------------------------------------------------------------------------
+        showPoint(map, userLocation);
+
+        //---------------------------------------------------------------------------------
+        // Add the clicked location to the map
+        // After the click, get the route from the user's location to the clicked location
+        //---------------------------------------------------------------------------------
+        getClickedLocation(map, (clickedLocation) => {
+             getRoute(map, userLocation, clickedLocation);
+        });
 
         //---------------------------------
         // Add interactive pins for the sessions
         //---------------------------------
         addSessionPinsCircle(map);
-
-        //--------------------------------------
-        // Add interactive pin for the user's location
-        //--------------------------------------
-        addUserPinCircle(map);
-
-    });
+    }
 }
-
-showMap();   // Call it! 
+showMap();
 
 // update the Length button's text when a dropdown item is selected.
 function updateLength(length) {
@@ -51,15 +93,12 @@ function addSessionPinsCircle(map) {
 
         allEvents.forEach(doc => {
             // Extract coordinates of the session
-            console.log(doc.data().geolocation.longitude);
+
             var coordinates = [doc.data().geolocation.longitude, doc.data().geolocation.latitude];
-            console.log(coordinates);
 
             var sessionDesc = doc.data().description;
-            console.log(sessionDesc);
 
             var sessionLength = doc.data().length;
-            console.log(sessionLength);
 
             var sessionOwner = doc.data().owner;
 
@@ -71,15 +110,13 @@ function addSessionPinsCircle(map) {
                     'description': sessionDesc,
                     'length': sessionLength,
                     "owner": sessionOwner,
-                    "email" : sessionEmail
+                    "email": sessionEmail
                 },
                 'geometry': {
                     'type': 'Point',
                     'coordinates': coordinates
                 }
             });
-
-            console.log(features);
 
         })
 
@@ -118,7 +155,6 @@ function addSessionPinsCircle(map) {
             const owner = e.features[0].properties.owner;
             const email = e.features[0].properties.email;
 
-            console.log("Email!" + email);
 
             // Ensure that if the map is zoomed out such that multiple 
             // copies of the feature are visible, the popup appears over 
@@ -131,6 +167,7 @@ function addSessionPinsCircle(map) {
                 .setLngLat(coordinates)
                 .setHTML(description + " " + length + " created by " + owner + " (" + email + ")")
                 .addTo(map);
+
         });
 
         // Change the cursor to a pointer when the mouse hovers over the places layer.
@@ -146,77 +183,172 @@ function addSessionPinsCircle(map) {
     })
 }
 
-//-----------------------------------------------------
-// Add pin for showing where the user is.
-// This is a separate function so that we can use a different
-// looking pin for the user.  
-// This version uses a pin that is just a circle. 
-//------------------------------------------------------
-function addUserPinCircle(map) {
-
-    // Adds user's current location as a source to the map
-    navigator.geolocation.getCurrentPosition(position => {
-        const userLocation = [position.coords.longitude, position.coords.latitude];
-
-        console.log(userLocation);
-        if (userLocation) {
-            map.addSource('userLocation', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': [{
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': userLocation
-                        },
-                        'properties': {
-                            'description': 'Your location'
+// ---------------------------------------------------------------------
+// Add a pin for point that is provided as a parameter point (lat, long)
+// when the map loads. Note map.on is an event listener. 
+//
+// @params   map:  the map object;
+//           point:  an array of [lng, lat] coordinates
+// ---------------------------------------------------------------------
+function showPoint(map, point) {
+    map.on('load', () => {
+        //a point is added via a layer
+        map.addLayer({
+            id: 'point',
+            type: 'circle',
+            source: {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: [
+                        {
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                                type: 'Point',
+                                coordinates: point
+                            }
                         }
-                    }]
+                    ]
                 }
-            });
-
-            // Creates a layer above the map displaying the pins
-            // Add a layer showing the places.
-            map.addLayer({
-                'id': 'userLocation',
-                'type': 'circle', // what the pins/markers/points look like
-                'source': 'userLocation',
-                'paint': { // customize colour and size
-                    'circle-color': 'blue',
-                    'circle-radius': 8,
-                    'circle-stroke-width': 2,
-                    'circle-stroke-color': '#ffffff'
-                }
-            });
-
-            // Map On Click function that creates a popup displaying the user's location
-            map.on('click', 'userLocation', (e) => {
-                // Copy coordinates array.
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const description = e.features[0].properties.description;
-
-                new mapboxgl.Popup()
-                    .setLngLat(coordinates)
-                    .setHTML(description)
-                    .addTo(map);
-            });
-
-            // Change the cursor to a pointer when the mouse is over the userLocation layer.
-            map.on('mouseenter', 'userLocation', () => {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-
-            // Defaults
-            // Defaults cursor when not hovering over the userLocation layer
-            map.on('mouseleave', 'userLocation', () => {
-                map.getCanvas().style.cursor = '';
-            });
-        }
+            },
+            paint: {
+                'circle-radius': 10,
+                'circle-color': '#3887be',
+                'circle-stroke-width': 6,
+                'circle-stroke-color': '#7ED9CA',
+                'circle-stroke-opacity': 0.70
+            }
+        });
     });
 }
 
+//-----------------------------------------------------------------------------
+// This function is asynchronous event listener for when the user clicks on the map.
+// This function will return in the callback, the coordinates of the clicked location
+// and display a pin at that location as a map layer
+//
+// @params   map:  the map object;
+//           callback:  a function that will be called with the clicked location
+//-----------------------------------------------------------------------------
+function getClickedLocation(map, callback) {
+    map.on('click', (event) => {
+        const clickedLocation = Object.keys(event.lngLat).map((key) => event.lngLat[key]);
+        const end = {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                        type: 'Point',
+                        coordinates: clickedLocation
+                    }
+                }
+            ]
+        };
+        if (map.getLayer('end')) {
+            map.getSource('end').setData(end);
+        } else {
+            map.addLayer({
+                id: 'end',
+                type: 'circle',
+                source: {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: [
+                            {
+                                type: 'Feature',
+                                properties: {},
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: clickedLocation
+                                }
+                            }
+                        ]
+                    }
+                },
+                paint: {
+                    'circle-radius': 8,
+                    'circle-color': '#00ff00',
+                    'circle-opacity': 0.50
+                }
+            });
+        }
+        console.log(clickedLocation);
+        callback(clickedLocation);
+    });
+}
+
+// --------------------------------------------------------------
+// This is an asynchronous function that will use the API to get
+// the route from start to end. It will display the route on the map
+// and provide turn-by-turn directions in the sidebar.
+//
+// @params   map:  the start and end coordinates;
+//           start and end:  arrays of [lng, lat] coordinates
+// -------------------------------------------------------------
+async function getRoute(map, start, end) {
+    // make a directions request using cycling profile
+    // an arbitrary start will always be the same
+    // only the end or destination will change
+    const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`,
+        { method: 'GET' }
+    );
+    const json = await query.json();
+    const data = json.routes[0];
+    const route = data.geometry.coordinates;
+    console.log("route is " + route);
+    const geojson = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+            type: 'LineString',
+            coordinates: route
+        }
+    };
+    // if the route already exists on the map, we'll reset it using setData
+    if (map.getSource('route')) {
+        map.getSource('route').setData(geojson);
+    }
+    // otherwise, we'll make a new request
+    else {
+        map.addLayer({
+            id: 'route',
+            type: 'line',
+            source: {
+                type: 'geojson',
+                data: geojson
+            },
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            paint: {
+                'line-color': '#00FF00',
+                'line-width': 5,
+                'line-opacity': 0.75
+            }
+        });
+    }
+    //--------------------------------------------
+    // display the turn-by-turn legs of the route
+    // get the sidebar and add the instructions
+    // we use a bicycle icon for fun!  :)
+    //--------------------------------------------
+    const instructions = document.getElementById('instructions');
+    const steps = data.legs[0].steps;
+
+    let tripInstructions = '';
+    for (const step of steps) {
+        tripInstructions += `<li>${step.maneuver.instruction}</li>`;
+    }
+    instructions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
+        data.duration / 60
+    )} min 🚴 </strong></p><ol>${tripInstructions}</ol>`;
+}
 
 // Listen for changes in the authentication state (e.g., user logs in or out)
 firebase.auth().onAuthStateChanged(user => {
@@ -298,7 +430,7 @@ firebase.auth().onAuthStateChanged(user => {
     } // <-- Closes if(user)
 }); // <-- Closes firebase.auth listener
 
-                
+
 
 
 function deleteCurrentUserSession() {
@@ -339,14 +471,14 @@ function deleteCurrentUserSession() {
 function toggleForm() {
     const form = document.getElementById("sessionFormPopup");
     const button = document.querySelector(".btn-sage"); // Create Session button
-  
+
     const isFormVisible = form.style.display === "block";
-  
+
     // Toggle visibility
     form.style.display = isFormVisible ? "none" : "block";
     button.style.display = isFormVisible ? "inline-block" : "none"; // Hide or show button
-  }
-  
+}
+
 
 // Enable the submit button only if both fields are filled
 function checkFormReady() {
