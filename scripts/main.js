@@ -55,7 +55,7 @@ function showMap() {
             style: 'mapbox://styles/mapbox/streets-v11', // Styling URL,
             center: userLocation, // center the map at the user's location
             //center: [-123.0019, 49.2490], // Starting position
-            zoom: 16
+            zoom: 15
         });
 
         //---------------------------------------------------------------------------------
@@ -333,21 +333,6 @@ async function getRoute(map, start, end) {
             }
         });
     }
-    //--------------------------------------------
-    // display the turn-by-turn legs of the route
-    // get the sidebar and add the instructions
-    // we use a bicycle icon for fun!  :)
-    //--------------------------------------------
-    const instructions = document.getElementById('instructions');
-    const steps = data.legs[0].steps;
-
-    let tripInstructions = '';
-    for (const step of steps) {
-        tripInstructions += `<li>${step.maneuver.instruction}</li>`;
-    }
-    instructions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
-        data.duration / 60
-    )} min 🚴 </strong></p><ol>${tripInstructions}</ol>`;
 }
 
 // Listen for changes in the authentication state (e.g., user logs in or out)
