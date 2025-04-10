@@ -2,97 +2,129 @@
 # Project Name
 
 ## Overview
-Summarize your project's purpose, problem solved, key features, user benefits, development context, and main technologies used.
+CampusNav is a real-time web application that helps students create, locate, and join in-person study sessions on campus. It addresses the problem of students struggling to find peers studying the same material — especially for those living off-campus or unfamiliar with the campus layout. Users can register and log in, view their current location, see nearby study sessions on an interactive map, and get information about each session.
 
-Example:
+This project was developed by a team of BCIT CST students as part of the COMP 1800 course. We followed agile development practices with weekly sprints, user-centred design feedback from our instructor Carly, and integrated several modern web technologies like Firebase and Mapbox.
 
-This client-side JavaScript web application provides real-time weather updates for cities worldwide. It simplifies accessing weather information through an intuitive mobile-first interface, allowing users to input a city name and receive data on temperature, humidity, and conditions.
-
-Developed for the [Course Name] course, applying User-Centred Design practices, agile project management processes, integrating a weather API, and Firebase backend services.
 
 ---
 
 ## Features
 
-Example:
-- Real-time weather updates for any city.
-- Responsive design for desktop and mobile.
-- Displays temperature, humidity, and weather conditions.
-- Color palelte:  Monochromatic Sage Green Color Palette: 
-Sage Hint (#BFCFBB)
-Mint (#BFCFBB)
-Sage (#8EA58C)
-Moss (#738A6E)
+- Firebase Authentication for secure login and signup
+- Firestore database integration to store users and session data
+- Create and post new study sessions with geolocation
+- Interactive map using Mapbox API to display study sessions and user location
+- Real-time updates for session activity indicators
+- Auto-removal of expired sessions from Firestore
+- Personalized messages and session tracking
+- Clean, student-friendly UI styled with a sage green colour palette
 
 ---
 
 ## Technologies Used
 
-Example:
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Firebase for hosting
-- **Database**: Firestore
-- **API**: OpenWeatherMap API
+
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap, Font Awesome
+- **Backend**: Firebase Authentication, Firestore
+- **Map API**: Mapbox GL JS
+- **Version Control**: Git and GitHub
+- **Design Tools**: Figma (UI/UX wireframes), Trello (project management), Discord (team meetings)
+
 
 ---
 
 ## Usage
 
-Example:
-1. Open your browser and visit `http://localhost:3000`.
-2. Enter the name of the city in the search bar and press enter.
-3. View the weather information displayed on the screen.
+1. Visit the live app: [https://campusnav-8ebd2.web.app](https://campusnav-8ebd2.web.app)
+2. Log in or create a new account.
+3. On the main page:
+   - View your session status and welcome message.
+   - Create a new session with a description and duration.
+   - See yourself and other study groups on the map.
+4. Click on any session marker to view details and contact info.
 
 ---
 
 ## Project Structure
-
-Example:
-```
-project-name/
-├── src/
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js
-│   └── components/
-├── package.json
+campusnav/
+├── .firebaserc
+├── .gitignore
+├── 404.html
+├── firebase.json
+├── firestore.indexes.json
+├── firestore.rules
+├── index.html
+├── login.html
+├── main.html
 ├── README.md
-└── .gitignore
-```
+├── template.html
+├── test.md
+├── .firebase/
+│   └── hosting..cache
+├── images/
+│   ├── AM01.jpg
+│   ├── BBY01.jpg
+│   ├── drink1.jpg
+│   ├── drink2.jpg
+│   ├── drink3.jpg
+│   ├── elmo.jpg
+│   ├── hike1.jpg
+│   ├── hike2.jpg
+│   ├── hike3.jpg
+│   ├── logo.jpg
+│   └── NV01.jpg
+├── scripts/
+│   ├── authentification.js
+│   ├── firebaseAPI.js
+│   ├── main.js
+│   ├── script.js
+│   └── skeleton.js
+├── styles/
+│   ├── style_index.css
+│   ├── style_login.css
+│   ├── style.css
+│   └── text/
+│       ├── nav_after_login.html
+│       └── nav_before_login.html
 
----
 
 ## Contributors
+```
 - Nikolas Rose - BCIT CST Student who enjoys programming and has a passion for gaming and hiking.
 - **Nathan** - BCIT CST Student, I'm studying CST at BCIT.
 - **Berenice** - BCIT CST Student. I am excited to see what I can create!
 
 ---
-
+```
 ## Acknowledgments
 
-Example:
-- Weather data sourced from [OpenWeatherMap](https://openweathermap.org/).
-- Code snippets for ___ algoirthm were adapted from resources such as [Stack Overflow](https://stackoverflow.com/) and [MDN Web Docs](https://developer.mozilla.org/).
-- Icons sourced from [FontAwesome](https://fontawesome.com/) and images from [Unsplash](https://unsplash.com/).
+- [Font Awesome](https://fontawesome.com/) – Icon library
+- [Feather Icons](https://feathericons.com/)
+- [Google Fonts](https://fonts.google.com/)
+- [Bootstrap](https://getbootstrap.com/) – For layout and responsive components
+- [Adobe Fonts](https://fonts.adobe.com/) – Font inspiration
+- [Adobe Stock Images](https://stock.adobe.com/images) – UI inspiration
+- Instructor **Carly** for guidance and project pivots
 
 ---
 
 ## Limitations and Future Work
 ### Limitations
 
-Example:
-- Currently, the app only supports city-based weather searches.
-- Limited to basic weather parameters like temperature, humidity, and conditions.
-- The user interface can be further enhanced for accessibility.
+- Map routing was incomplete at submission but will be added post-launch
+- UI is partially polished; layout tweaks in progress
+- Sessions can't currently be "joined" formally — it's more about location and contact
+- No filtering options for sessions yet (e.g., by course or subject)
+- Known bug: occasionally delays rendering markers when sessions expire
 
 ### Future Work
 
-Example: 
-- Add support for location-based weather detection using GPS.
-- Implement additional weather parameters like wind speed and UV index.
-- Create a dark mode for better usability in low-light conditions.
-- Integrate user accounts for saving favorite locations.
+- Implement “Join Session” feature for RSVP functionality
+- Add filters by course ID or subject
+- Allow club-based session tagging
+- Improve mobile responsiveness and navigation
+- Add dark mode and accessibility improvements
 
 ---
 
